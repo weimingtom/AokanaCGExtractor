@@ -362,6 +362,7 @@ DWORD WINAPI DebugThread(LPVOID arg)
 
 	DWORD dwDataLength = 0;	//[ESP + 0x10] at 0x443848
 	char szName[16];		//[ESP + 0x0C] at 0x44384D
+	char szHeader[8];		//[ESP + 0x08] at 0x44384D This value should "BSE 1.0\0"
 
 	BOOL bFlag = FALSE;
 	BOOL bFlag2 = FALSE;
@@ -525,12 +526,21 @@ DWORD WINAPI DebugThread(LPVOID arg)
 
 								if (lcContext.Eax == dwDataLength)
 								{
-									//Read Succeed
-									ptr = (LPVOID)(lcContext.Esp + 0x0C);
+									ptr = (LPVOID)(lcContext.Esp + 0x08);
 									ReadProcessMemory(hProcess, ptr, &ptr2, 4, &dwRead);
-									ReadProcessMemory(hProcess, ptr2, &szName, 16, &dwRead);
+									ReadProcessMemory(hProcess, ptr2, &szHeader, 8, &dwRead);
 
-									bBPAddr = SetSoftwareBreakpoint(hProcess, dwBPAddress);
+									if (strncmp(szHeader, "BSE 1.0\0", 8) == 0)
+									{
+										//Read Succeed
+										ptr = (LPVOID)(lcContext.Esp + 0x0C);
+										ReadProcessMemory(hProcess, ptr, &ptr2, 4, &dwRead);
+										ReadProcessMemory(hProcess, ptr2, &szName, 16, &dwRead);
+
+										bBPAddr = SetSoftwareBreakpoint(hProcess, dwBPAddress);
+									}
+									else
+										bDataRead = SetSoftwareBreakpoint(hProcess, dwDataRead);
 								}
 								else
 									bDataRead = SetSoftwareBreakpoint(hProcess, dwDataRead);
