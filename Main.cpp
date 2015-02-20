@@ -442,7 +442,7 @@ DWORD WINAPI DebugThread(LPVOID arg)
 								{
 									wsprintf(str, L"[%dx%d] %S", width, height, szName);
 									
-									if (SendMessage(hListLayer, LB_FINDSTRING, -1, (LPARAM)str) == LB_ERR)
+									if (SendMessage(hListLayer, LB_FINDSTRINGEXACT, -1, (LPARAM)str) == LB_ERR)
 									{
 										SendMessage(hListLayer, LB_INSERTSTRING, 0, (LPARAM)str);
 
