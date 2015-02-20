@@ -149,7 +149,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 			return 0;
 		case WM_ACTIVATE:
-			if (wParam != WA_INACTIVE)
+			if (wParam == WA_CLICKACTIVE)
 			{
 				viewer.foreground();
 				SetForegroundWindow(hWnd);
