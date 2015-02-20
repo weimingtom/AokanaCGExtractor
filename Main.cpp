@@ -37,7 +37,7 @@ public:
 	}
 };
 
-LPCWSTR lpszClass = L"Merge Image";
+LPCWSTR lpszClass = L"AokanaCGExtractor";
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 HWND FindAokana(LPDWORD lpdwThreadId, LPDWORD lpdwProcessId = NULL);

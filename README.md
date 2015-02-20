@@ -22,7 +22,7 @@ Select the image in the list to see preview. If you select multiple images, it m
 You can save selected images into PNG Files
 
 ## Important
-You may have to change DebugThread in Main.cpp to work properly.
+You may have to change DebugThread in [Main.cpp](/Main.cpp) to work properly.
 Do not press start on 'Title' and 'Message Log'. It may corrupt.
 
 ## Dependencies
