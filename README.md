@@ -1,4 +1,4 @@
-# AokanaCGExtractor
+﻿# AokanaCGExtractor
 Simple CG Extractor of the Japanese Visual Novel game 'Aono Kanatano Four Rhythm(蒼の彼方のフォーリズム)'
 
 ## Description
@@ -9,7 +9,7 @@ Run the game and press 'Game Start' or 'Extra > CG Views'.
 Execute AokanaCGExtractor and press start button.
 
 Then you will see the window like this.
- - insert image
+ ![Start Window](/Screenshots/Screenshot01.JPG?raw=true "Screenshot of the window")
 
 When you play the game or click the CG, AokanaCGExtractor captures memory and shows list of the captured images.
  - insert image
