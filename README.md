@@ -12,10 +12,12 @@ Then you will see the window like this.
  ![Start Window](/Screenshots/Screenshot01.JPG?raw=true "Screenshot of the window")
 
 When you play the game or click the CG, AokanaCGExtractor captures memory and shows list of the captured images.
- - insert image
+ ![Captured1](/Screenshots/Screenshot02.JPG?raw=true "Usage at CG Views")
 
 Select the image in the list to see preview. If you select multiple images, it merges images.
- - insert image
+ ![Select1](/Screenshots/Screenshot04.JPG?raw=true "One item selected")
+ ![Select2](/Screenshots/Screenshot05.JPG?raw=true "Two item selected")
+ ![Select3](/Screenshots/Screenshot06.JPG?raw=true "Two item selected in in-game")
 
 You can save selected images into PNG Files
 
