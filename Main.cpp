@@ -153,6 +153,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			{
 				viewer.foreground();
 				SetForegroundWindow(hWnd);
+				SetFocus(hListLayer);
 			}
 			return 0;
 		case WM_COMMAND:
