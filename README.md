@@ -26,5 +26,5 @@ You may have to change DebugThread in [Main.cpp](/Main.cpp) to work properly.
 Do not press start on 'Title' and 'Message Log'. It may corrupt.
 
 ## Dependencies
-libpng (http://www.libpng.org/pub/png/libpng.html)
-zlib (http://www.zlib.net)
+* libpng (http://www.libpng.org/pub/png/libpng.html)
+* zlib (http://www.zlib.net)
