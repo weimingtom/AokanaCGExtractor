@@ -85,19 +85,23 @@ bool ImgViewer::create(unsigned short width, unsigned short height)
 		SetWindowPos(hWindow, HWND_NOTOPMOST, 0, 0, rt.right - rt.left, rt.bottom - rt.top, SWP_NOACTIVATE | SWP_NOMOVE);
 
 		data = (PIXEL *)calloc(width * height, sizeof(PIXEL));
+		if (data)
+		{
+			for (int i = 0; i < width; i++)
+				for (int j = 0; j < height; j++)
+				{
+					if ((i / 10) % 2 == (j / 10) % 2)
+						data[j * width + i].value = 0xFFCCCCCC;
+					else
+						data[j * width + i].value = 0xFFFFFFFF;
+				}
 
-		for (int i = 0; i < width; i++)
-			for (int j = 0; j < height; j++)
-			{
-				if ((i / 10) % 2 == (j / 10) % 2)
-					data[j * width + i].value = 0xFFCCCCCC;
-				else
-					data[j * width + i].value = 0xFFFFFFFF;
-			}
+			bData = TRUE;
 
-		bData = TRUE;
-
-		InvalidateRect(hWindow, NULL, FALSE);
+			InvalidateRect(hWindow, NULL, FALSE);
+		}
+		else
+			MessageBox(NULL, L"Memory Allocation Failed!!", L"Error", MB_OK | MB_ICONERROR);
 	}
 
 	return bReturn;
