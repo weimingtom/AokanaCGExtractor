@@ -130,7 +130,7 @@ void ImgViewer::setdata(PIXEL *data)
 void ImgViewer::foreground()
 {
 	if (bInit)
-		SetWindowPos(hWindow, HWND_TOP, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOMOVE);
+		SetForegroundWindow(hWindow);
 }
 
 void ImgViewer::overlay(PIXEL *data)
