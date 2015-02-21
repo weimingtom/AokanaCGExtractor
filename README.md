@@ -4,6 +4,8 @@ Simple CG Extractor of the Japanese Visual Novel game 'Aono Kanatano Four Rhythm
 ## Description
 This program extract CG using Memory Hooking. So you need original copy of the game.
 
+I tested this program on Windows 8.1 x64 Enterprise (Japanese) and Windows 8.1 x64 Enterprise (Korean, Change locale to 932).
+
 ## How to use
 Run the game and press 'Game Start' or 'Extra > CG Views'.
 Execute AokanaCGExtractor and press start button.
@@ -20,9 +22,6 @@ Select the image in the list to see preview. If you select multiple images, it m
  ![Select3](/Screenshots/Screenshot06.JPG?raw=true "Two item selected in in-game")
 
 You can save selected images into PNG Files
-
-## Important
-You may have to change DebugThread in [Main.cpp](/Main.cpp) to work properly.
 
 ## Dependencies
 * libpng (http://www.libpng.org/pub/png/libpng.html)
