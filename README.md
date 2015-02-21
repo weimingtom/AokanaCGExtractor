@@ -5,6 +5,7 @@ Simple CG Extractor of the Japanese Visual Novel game 'Aono Kanatano Four Rhythm
 This program extract CG using Memory Hooking. So you need original copy of the game.
 
 I tested this program on Windows 8.1 x64 Enterprise (Japanese) and Windows 8.1 x64 Enterprise (Korean, Change locale to 932).
+Also tested on Mac OS X 10.10.1 with wine 1.6.2.
 
 ## How to use
 Run the game and press 'Game Start' or 'Extra > CG Views'.
