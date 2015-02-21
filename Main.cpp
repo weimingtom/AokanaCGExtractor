@@ -1,5 +1,4 @@
 #include <Windows.h>
-#include <vector>
 #include "Image.h"
 
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
@@ -14,27 +13,6 @@ struct Image{
 	unsigned short width;
 	unsigned short height;
 	PIXEL *data;
-};
-class ICriticalSection{
-private:
-	CRITICAL_SECTION cs;
-public:
-	ICriticalSection()
-	{
-		InitializeCriticalSection(&cs);
-	}
-	~ICriticalSection()
-	{
-		DeleteCriticalSection(&cs);
-	}
-	void Enter()
-	{
-		EnterCriticalSection(&cs);
-	}
-	void Leave()
-	{
-		LeaveCriticalSection(&cs);
-	}
 };
 
 LPCWSTR lpszClass = L"AokanaCGExtractor";
@@ -100,15 +78,12 @@ HANDLE hDebugInit;
 HANDLE hDebugEnd;
 HANDLE hDebugThread;
 
-std::vector<Image> vImages;
-ICriticalSection ics;
-
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	int nItemCount;
 	int nSelected;
 	int *nIndexes;
-	Image imgCurrent;
+	Image *imgCurrent;
 	Image out;
 
 	switch (iMessage)
@@ -207,17 +182,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 						for (int i = nSelected - 1; i >= 0; i--)
 						{
-							imgCurrent = vImages.at(nItemCount - nIndexes[i] - 1);
+							imgCurrent = (Image *)SendMessage(hListLayer, LB_GETITEMDATA, nIndexes[i], 0);
+
+							if (imgCurrent == NULL)
+								continue;
 
 							if (i == nSelected - 1)
 							{
-								out.data = (PIXEL *)calloc(imgCurrent.width * imgCurrent.height, sizeof(PIXEL));
-								out.width = imgCurrent.width;
-								out.height = imgCurrent.height;
+								out.data = (PIXEL *)calloc(imgCurrent->width * imgCurrent->height, sizeof(PIXEL));
+								out.width = imgCurrent->width;
+								out.height = imgCurrent->height;
 							}
 
-							if (imgCurrent.width == out.width && imgCurrent.height == out.height)
-								pixeloverlay(out.width, out.height, out.data, imgCurrent.data, out.data);
+							if (imgCurrent->width == out.width && imgCurrent->height == out.height)
+								pixeloverlay(out.width, out.height, out.data, imgCurrent->data, out.data);
 						}
 
 						saveDialog(hWnd, out);
@@ -239,13 +217,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 							for (int i = nSelected - 1; i >= 0; i--)
 							{
-								imgCurrent = vImages.at(nItemCount - nIndexes[i] - 1);
+								imgCurrent = (Image *)SendMessage(hListLayer, LB_GETITEMDATA, nIndexes[i], 0);
+
+								if (imgCurrent == NULL)
+									continue;
 
 								if (i == nSelected - 1)
-									viewer.create(imgCurrent.width, imgCurrent.height);
+									viewer.create(imgCurrent->width, imgCurrent->height);
 
-								if (imgCurrent.width == viewer.getwidth() && imgCurrent.height == viewer.getheight())
-									viewer.overlay(imgCurrent.data);
+								if (imgCurrent->width == viewer.getwidth() && imgCurrent->height == viewer.getheight())
+									viewer.overlay(imgCurrent->data);
 							}
 
 							viewer.show();
@@ -262,10 +243,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			if (bStarted)
 				SendMessage(hWnd, WM_COMMAND, ID_START_BUTTON, 0);
 
-			ics.Enter();
-			for (unsigned int i = 0; i < vImages.size(); i++)
-				free(vImages.at(i).data);
-			ics.Leave();
+			nItemCount = SendMessage(hListLayer, LB_GETCOUNT, 0, 0);
+			for (int i = 0; i < nItemCount; i++)
+			{
+				imgCurrent = (Image *)SendMessage(hListLayer, LB_GETITEMDATA, i, 0);
+				free(imgCurrent->data);
+				free(imgCurrent);
+			}
 
 			CloseHandle(hAttachSucceeded);
 			CloseHandle(hDebugEnd);
@@ -385,7 +369,7 @@ DWORD WINAPI DebugThread(LPVOID arg)
 	DWORD dwLength;
 	BYTE *pData;
 
-	Image result;
+	Image *result;
 //	SYSTEMTIME time;
 	WCHAR str[64];
 
@@ -456,14 +440,15 @@ DWORD WINAPI DebugThread(LPVOID arg)
 										SendMessage(hListLayer, LB_INSERTSTRING, 0, (LPARAM)str);
 
 										ReadProcessMemory(hProcess, (LPVOID)(pBMPData + 0x10), pData, dwLength, &dwRead);
+										result = (Image *)calloc(1, sizeof(Image));
 
-										result.width = width;
-										result.height = height;
-										result.data = (PIXEL *)pData;
+										result->width = width;
+										result->height = height;
+										result->data = (PIXEL *)pData;
 
 										//Is this bitmap has no alpha channel (all alpha channel == 0)
 										for (int i = 0; i < width * height; i++)
-											if (result.data[i].a != 0x00)
+											if (result->data[i].a != 0x00)
 											{
 												bAlpha = TRUE;
 												break;
@@ -472,12 +457,10 @@ DWORD WINAPI DebugThread(LPVOID arg)
 										//Set alpha channel
 										if (!bAlpha)
 											for (int i = 0; i < width * height; i++)
-												result.data[i].a = 0xFF;
+												result->data[i].a = 0xFF;
 
-										ics.Enter();
-										//Insert Decoded Image to vector
-										vImages.push_back(result);
-										ics.Leave();
+										//Insert Decoded Image to List
+										SendMessage(hListLayer, LB_SETITEMDATA, 0, (LPARAM)result);
 									}
 								}
 
