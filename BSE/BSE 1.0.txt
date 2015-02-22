@@ -1,0 +1,28 @@
+BSE 1.0 File Structure
+
+Header			8Bytes	"BSE 1.0\0"
+Unknown			2Bytes	00h 01h
+CRC-8			1Bytes	n
+Unknown 		1Bytes
+Unknown			4Bytes
+Encrypted Header	64Bytes
+Data
+
+Decryption result of the Encrypted Header is 'CompressedBG___\0'
+
+Example
+Original akcg01_a1
+42 53 45 20|31 2E 30 00|00 01 56 E4|C9 A5 6D 70| BSE 1.0  VaE\mp
+20 ED 53 38|7D 95 E3 03|2C BE 10 D9|42 70 09 16|  iS8}?a,?UBp	
+A6 77 CD 8F|82 18 DC 3B|D8 F4 22 9E|A5 87 03 18| |wI??U;Oo"?\Åˆ
+DF C6 B1 1F|E9 52 A0 68|9A 0E 95 46|FD 9C 18 17| sAÅ}eR?h??Fy?
+C9 F7 29 45|DB 1B 0C 3D|C2 14 B3 9F|F4 7F B9 39| EÅÄ)EU=A3?o19
+
+Header Decrypted Result
+42 53 45 20|31 2E 30 00|00 01 56 E4|C9 A5 6D 70| BSE 1.0  VaE\mp
+43 6F 6D 70|72 65 73 73|65 64 42 47|5F 5F 5F 00| CompressedBG___
+00 05 D0 02|20 00 00 00|00 00 00 00|00 00 00 00|  D
+EB D0 26 00|30 24 A1 02|13 02 00 00|7A BC 01 00| eD& 0$!  z?
+26 6F 71 A5|21 22 E7 EB|67 36 78 9B|8E 63 38 E7| &oq\!"ceg6x??c8c
+
+CRC-8 is CRC-8 of Decrypted Result of the Encrypted Header
