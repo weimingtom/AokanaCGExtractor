@@ -8,6 +8,10 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #define ID_LAYER_LIST		0
 #define ID_START_BUTTON		1
 #define ID_SAVE_BUTTON		2
+#define ID_RESET_ALL		3
+#define ID_RESET_SEL		4
+#define ID_RESET_UNSEL		5
+#define ID_SAVE_ALL			6
 
 struct Image{
 	unsigned short width;
@@ -21,6 +25,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 HWND FindAokana(LPDWORD lpdwThreadId, LPDWORD lpdwProcessId = NULL);
 int saveImage(Image &img, WCHAR *pszFileName);
 BOOL saveDialog(HWND hWnd, Image &img);
+BOOL selectFolder(HWND hWnd, WCHAR *pszFolder);
 BOOL SetPrivilege(HANDLE hToken, LPCTSTR lpszPrivilege, BOOL bEnablePrivilege);
 DWORD WINAPI DebugThread(LPVOID arg);
 
@@ -65,7 +70,12 @@ HWND hAokanaWnd;
 
 HWND hButtonStart;
 HWND hButtonSave;
+HWND hButtonSaveAll;
 HWND hListLayer;
+
+HWND hButtonResetAll;
+HWND hButtonResetSelected;
+HWND hButtonResetUnselected;
 
 HFONT hFont;
 
@@ -78,11 +88,17 @@ HANDLE hDebugInit;
 HANDLE hDebugEnd;
 HANDLE hDebugThread;
 
+WCHAR pszFolder[4096];
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	int nItemCount;
 	int nSelected;
 	int *nIndexes;
+	BOOL bFlag;
+	WCHAR *pszFile;
+	WCHAR *handle;
+	WCHAR *token;
 	Image *imgCurrent;
 	Image out;
 
@@ -94,15 +110,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			viewer.changeCaption(L"Preview");
 
 			//Create Controls
-			hListLayer = CreateWindow(L"ListBox", NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_EXTENDEDSEL | LBS_HASSTRINGS | LBS_NOTIFY, 0, 25, 300, 675, hWnd, (HMENU)ID_LAYER_LIST, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
-			hButtonStart = CreateWindow(L"Button", L"Start", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 0, 0, 100, 25, hWnd, (HMENU)ID_START_BUTTON, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
-			hButtonSave = CreateWindow(L"Button", L"Save Selected", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 100, 0, 200, 25, hWnd, (HMENU)ID_SAVE_BUTTON, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+			hListLayer = CreateWindow(L"ListBox", NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_EXTENDEDSEL | LBS_HASSTRINGS | LBS_NOTIFY | LBS_MULTIPLESEL | LBS_NOINTEGRALHEIGHT, 0, 100, 300, 600, hWnd, (HMENU)ID_LAYER_LIST, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+			hButtonStart = CreateWindow(L"Button", L"Start", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 0, 0, 100, 50, hWnd, (HMENU)ID_START_BUTTON, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+			hButtonSave = CreateWindow(L"Button", L"Save Selected in merged file", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE, 100, 0, 100, 50, hWnd, (HMENU)ID_SAVE_BUTTON, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+			hButtonSaveAll = CreateWindow(L"Button", L"Save All in individual file", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE, 200, 0, 100, 50, hWnd, (HMENU)ID_SAVE_ALL, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+			hButtonResetAll = CreateWindow(L"Button", L"Erase All", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE, 0, 50, 100, 50, hWnd, (HMENU)ID_RESET_ALL, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+			hButtonResetSelected = CreateWindow(L"Button", L"Erase Selected", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE, 100, 50, 100, 50, hWnd, (HMENU)ID_RESET_SEL, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+			hButtonResetUnselected = CreateWindow(L"Button", L"Erase Unelected", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE, 200, 50, 100, 50, hWnd, (HMENU)ID_RESET_UNSEL, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
 
 			hFont = CreateFont(20, 0, 0, 0, 400, 0, 0, 0, DEFAULT_CHARSET, 3, 2, 1, FF_ROMAN, L"Segoe UI");
 
 			SendMessage(hListLayer, WM_SETFONT, (WPARAM)hFont, TRUE);
 			SendMessage(hButtonStart, WM_SETFONT, (WPARAM)hFont, TRUE);
 			SendMessage(hButtonSave, WM_SETFONT, (WPARAM)hFont, TRUE);
+			SendMessage(hButtonSaveAll, WM_SETFONT, (WPARAM)hFont, TRUE);
+			SendMessage(hButtonResetAll, WM_SETFONT, (WPARAM)hFont, TRUE);
+			SendMessage(hButtonResetSelected, WM_SETFONT, (WPARAM)hFont, TRUE);
+			SendMessage(hButtonResetUnselected, WM_SETFONT, (WPARAM)hFont, TRUE);
 
 			//Create Events
 			hAttachSucceeded = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -203,6 +227,39 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 						free(nIndexes);
 					}
 					break;
+				case ID_SAVE_ALL:
+					nItemCount = SendMessage(hListLayer, LB_GETCOUNT, 0, 0);
+
+					if (nItemCount > 0)
+					{
+						if (selectFolder(hWnd, pszFolder))
+						{
+							pszFile = (WCHAR *)calloc(256, sizeof(WCHAR));
+
+							for (int i = nItemCount - 1; i >= 0; i--)
+							{
+								imgCurrent = (Image *)SendMessage(hListLayer, LB_GETITEMDATA, i, 0);
+								SendMessage(hListLayer, LB_GETTEXT, i, (LPARAM)pszFile);
+
+								token = wcstok_s(pszFile, L" ", &handle);
+								token = wcstok_s(NULL, L" ", &handle);
+
+								if (pszFolder[wcslen(pszFolder) - 1] != '\\')
+									wcscat_s(pszFolder, L"\\");
+
+								nSelected = wcslen(pszFolder);	//Position of '\' + 1
+
+								wcscat_s(pszFolder, token);
+								wcscat_s(pszFolder, L".png");
+								saveImage(*imgCurrent, pszFolder);
+
+								pszFolder[nSelected] = 0;
+							}
+
+							free(pszFile);
+						}
+					}
+					break;
 				case ID_LAYER_LIST:
 					if (HIWORD(wParam) == LBN_SELCHANGE)
 					{
@@ -237,19 +294,74 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 							viewer.hide();
 					}
 					break;
+				case ID_RESET_ALL:
+					nItemCount = SendMessage(hListLayer, LB_GETCOUNT, 0, 0);
+					for (int i = 0; i < nItemCount; i++)
+					{
+						imgCurrent = (Image *)SendMessage(hListLayer, LB_GETITEMDATA, i, 0);
+						free(imgCurrent->data);
+						free(imgCurrent);
+					}
+					SendMessage(hListLayer, LB_RESETCONTENT, 0, 0);
+					break;
+				case ID_RESET_SEL:
+					nItemCount = SendMessage(hListLayer, LB_GETCOUNT, 0, 0);
+					nSelected = SendMessage(hListLayer, LB_GETSELCOUNT, 0, 0);
+
+					if (nSelected > 0)
+					{
+						nIndexes = (int *)calloc(nSelected, sizeof(int));
+
+						SendMessage(hListLayer, LB_GETSELITEMS, nSelected, (LPARAM)nIndexes);
+
+						for (int i = nSelected - 1; i >= 0; i--)
+						{
+							imgCurrent = (Image *)SendMessage(hListLayer, LB_GETITEMDATA, nIndexes[i], 0);
+							free(imgCurrent->data);
+							free(imgCurrent);
+							SendMessage(hListLayer, LB_DELETESTRING, nIndexes[i], 0);
+						}
+
+						free(nIndexes);
+					}
+					break;
+				case ID_RESET_UNSEL:
+					nItemCount = SendMessage(hListLayer, LB_GETCOUNT, 0, 0);
+					nSelected = SendMessage(hListLayer, LB_GETSELCOUNT, 0, 0);
+
+					if (nSelected > 0)
+					{
+						nIndexes = (int *)calloc(nSelected, sizeof(int));
+
+						SendMessage(hListLayer, LB_GETSELITEMS, nSelected, (LPARAM)nIndexes);
+
+						for (int i = nItemCount - 1; i >= 0; i--)
+						{
+							bFlag = FALSE;
+
+							for (int j = nSelected - 1; j >= 0; j--)
+								if (i == nIndexes[j])
+									bFlag = TRUE;
+
+							if (!bFlag)
+							{
+								imgCurrent = (Image *)SendMessage(hListLayer, LB_GETITEMDATA, i, 0);
+								free(imgCurrent->data);
+								free(imgCurrent);
+								SendMessage(hListLayer, LB_DELETESTRING, i, 0);
+							}
+						}
+
+						free(nIndexes);
+					}
+					break;
 			}
 			return 0;
 		case WM_DESTROY:
 			if (bStarted)
 				SendMessage(hWnd, WM_COMMAND, ID_START_BUTTON, 0);
 
-			nItemCount = SendMessage(hListLayer, LB_GETCOUNT, 0, 0);
-			for (int i = 0; i < nItemCount; i++)
-			{
-				imgCurrent = (Image *)SendMessage(hListLayer, LB_GETITEMDATA, i, 0);
-				free(imgCurrent->data);
-				free(imgCurrent);
-			}
+			SendMessage(hWnd, WM_COMMAND, ID_RESET_ALL, 0);
 
 			CloseHandle(hAttachSucceeded);
 			CloseHandle(hDebugEnd);
@@ -702,5 +814,36 @@ BOOL SetPrivilege(
 		return FALSE;
 	}
 
+	return TRUE;
+}
+
+#include <ShlObj.h>
+
+BOOL selectFolder(HWND hParent, WCHAR *szFolder)
+{
+	LPMALLOC pMalloc;
+	LPITEMIDLIST pidl;
+	BROWSEINFO bi;
+
+	bi.hwndOwner = hParent;
+	bi.pidlRoot = NULL;
+	bi.pszDisplayName = NULL;
+	bi.lpszTitle = L"Select Folder to Save";
+	bi.ulFlags = 0;
+	bi.lpfn = NULL;
+	bi.lParam = NULL;
+
+	pidl = SHBrowseForFolder(&bi);
+
+	if (pidl == NULL) {
+		return FALSE;
+	}
+	SHGetPathFromIDList(pidl, szFolder);
+
+	if (SHGetMalloc(&pMalloc) != NOERROR) {
+		return FALSE;
+	}
+	pMalloc->Free(pidl);
+	pMalloc->Release();
 	return TRUE;
 }
