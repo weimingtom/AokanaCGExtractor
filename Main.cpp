@@ -306,6 +306,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 						free(imgCurrent);
 					}
 					SendMessage(hListLayer, LB_RESETCONTENT, 0, 0);
+					viewer.hide();
 					break;
 				case ID_RESET_SEL:
 					nItemCount = SendMessage(hListLayer, LB_GETCOUNT, 0, 0);
@@ -326,6 +327,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 						}
 
 						free(nIndexes);
+						viewer.hide();
 					}
 					break;
 				case ID_RESET_UNSEL:
