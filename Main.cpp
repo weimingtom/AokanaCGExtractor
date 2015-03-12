@@ -204,6 +204,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 						SendMessage(hListLayer, LB_GETSELITEMS, nSelected, (LPARAM)nIndexes);
 
+						memset(&out, 0, sizeof(Image));
+
 						for (int i = nSelected - 1; i >= 0; i--)
 						{
 							imgCurrent = (Image *)SendMessage(hListLayer, LB_GETITEMDATA, nIndexes[i], 0);
@@ -225,6 +227,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 						saveDialog(hWnd, out);
 
 						free(nIndexes);
+						free(out.data);
 					}
 					break;
 				case ID_SAVE_ALL:
