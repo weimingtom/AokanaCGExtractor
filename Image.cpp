@@ -241,15 +241,17 @@ void ImgViewer::draw(HDC hdc)
 
 void pixeloverlay(unsigned short width, unsigned short height, PIXEL *under, PIXEL *over, PIXEL *out)
 {
-	unsigned char alpha;
+	int alphaFore;
+	int alphaBack;
 
 	for (int i = 0; i < width; i++)
 		for (int j = 0; j < height; j++)
 		{
-			alpha = over[j * width + i].a;
-			out[j * width + i].a = (under[j * width + i].a * (255 - alpha) + over[j * width + i].a * alpha) / 255;
-			out[j * width + i].r = (under[j * width + i].r * (255 - alpha) + over[j * width + i].r * alpha) / 255;
-			out[j * width + i].g = (under[j * width + i].g * (255 - alpha) + over[j * width + i].g * alpha) / 255;
-			out[j * width + i].b = (under[j * width + i].b * (255 - alpha) + over[j * width + i].b * alpha) / 255;
+			alphaFore = over[j * width + i].a;
+			alphaBack = under[j * width + i].a;
+			out[j * width + i].a = (alphaBack * (255 - alphaFore) + 255 * alphaFore) / 255;
+			out[j * width + i].r = (under[j * width + i].r * alphaBack * (255 - alphaFore) / 255 + over[j * width + i].r * alphaFore) / 255;
+			out[j * width + i].g = (under[j * width + i].g * alphaBack * (255 - alphaFore) / 255 + over[j * width + i].g * alphaFore) / 255;
+			out[j * width + i].b = (under[j * width + i].b * alphaBack * (255 - alphaFore) / 255 + over[j * width + i].b * alphaFore) / 255;
 		}
 }
