@@ -1,4 +1,4 @@
-#include <Windows.h>
+Ôªø#include <Windows.h>
 #include "Image.h"
 
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
@@ -49,7 +49,7 @@ int APIENTRY WinMain(HINSTANCE hPrevInstance, HINSTANCE hInstance, LPSTR lpszCmd
 
 	RegisterClass(&wndclass);
 
-	SetRect(&rt, 0, 0, 300, 700);
+	SetRect(&rt, 0, 0, 240, 500);
 	AdjustWindowRect(&rt, WS_CAPTION | WS_SYSMENU, FALSE);
 
 	hWnd = CreateWindow(lpszClass, lpszClass, WS_CAPTION | WS_SYSMENU, CW_USEDEFAULT, CW_USEDEFAULT, rt.right - rt.left, rt.bottom - rt.top, NULL, NULL, hInstance, NULL);
@@ -110,15 +110,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			viewer.changeCaption(L"Preview");
 
 			//Create Controls
-			hListLayer = CreateWindow(L"ListBox", NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_EXTENDEDSEL | LBS_HASSTRINGS | LBS_NOTIFY | LBS_MULTIPLESEL | LBS_NOINTEGRALHEIGHT, 0, 100, 300, 600, hWnd, (HMENU)ID_LAYER_LIST, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
-			hButtonStart = CreateWindow(L"Button", L"Start", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 0, 0, 100, 50, hWnd, (HMENU)ID_START_BUTTON, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
-			hButtonSave = CreateWindow(L"Button", L"Save Selected in merged file", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE, 100, 0, 100, 50, hWnd, (HMENU)ID_SAVE_BUTTON, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
-			hButtonSaveAll = CreateWindow(L"Button", L"Save All in individual file", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE, 200, 0, 100, 50, hWnd, (HMENU)ID_SAVE_ALL, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
-			hButtonResetAll = CreateWindow(L"Button", L"Erase All", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE, 0, 50, 100, 50, hWnd, (HMENU)ID_RESET_ALL, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
-			hButtonResetSelected = CreateWindow(L"Button", L"Erase Selected", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE, 100, 50, 100, 50, hWnd, (HMENU)ID_RESET_SEL, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
-			hButtonResetUnselected = CreateWindow(L"Button", L"Erase Unelected", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE, 200, 50, 100, 50, hWnd, (HMENU)ID_RESET_UNSEL, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+			hListLayer = CreateWindow(L"ListBox", NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_EXTENDEDSEL | LBS_HASSTRINGS | LBS_NOTIFY | LBS_MULTIPLESEL | LBS_NOINTEGRALHEIGHT, 0, 80, 240, 420, hWnd, (HMENU)ID_LAYER_LIST, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+			hButtonStart = CreateWindow(L"Button", L"Start", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 0, 0, 80, 40, hWnd, (HMENU)ID_START_BUTTON, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+			hButtonSave = CreateWindow(L"Button", L"Save Selected in merged file", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE, 80, 0, 80, 40, hWnd, (HMENU)ID_SAVE_BUTTON, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+			hButtonSaveAll = CreateWindow(L"Button", L"Save All in individual file", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE, 160, 0, 80, 40, hWnd, (HMENU)ID_SAVE_ALL, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+			hButtonResetAll = CreateWindow(L"Button", L"Erase All", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE, 0, 40, 80, 40, hWnd, (HMENU)ID_RESET_ALL, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+			hButtonResetSelected = CreateWindow(L"Button", L"Erase Selected", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE, 80, 40, 80, 40, hWnd, (HMENU)ID_RESET_SEL, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+			hButtonResetUnselected = CreateWindow(L"Button", L"Erase Unelected", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE, 160, 40, 80, 40, hWnd, (HMENU)ID_RESET_UNSEL, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
 
-			hFont = CreateFont(20, 0, 0, 0, 400, 0, 0, 0, DEFAULT_CHARSET, 3, 2, 1, FF_ROMAN, L"Segoe UI");
+			hFont = CreateFont(16, 0, 0, 0, 400, 0, 0, 0, DEFAULT_CHARSET, 3, 2, 1, FF_ROMAN, L"Segoe UI");
 
 			SendMessage(hListLayer, WM_SETFONT, (WPARAM)hFont, TRUE);
 			SendMessage(hButtonStart, WM_SETFONT, (WPARAM)hFont, TRUE);
@@ -384,7 +384,7 @@ HWND FindAokana(LPDWORD lpdwThreadId, LPDWORD lpdwProcessId)
 {
 	HWND hWnd;
 
-	hWnd = FindWindow(L"BGI - Main window", L"ëìÇÃîﬁï˚ÇÃÉtÉHÅ[ÉäÉYÉÄ");
+	hWnd = FindWindow(L"BGI - Main window", L"Ëíº„ÅÆÂΩºÊñπ„ÅÆ„Éï„Ç©„Éº„É™„Ç∫„É†");
 
 	if (hWnd != NULL && lpdwThreadId != NULL)
 		*lpdwThreadId = GetWindowThreadProcessId(hWnd, lpdwProcessId);
